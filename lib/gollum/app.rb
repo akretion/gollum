@@ -163,7 +163,7 @@ module Precious
         tempfile = params[:file][:tempfile]
       end
 
-      dir = 'uploads'
+      dir = request.referer.split('https://wiki.akretion.com/')[1].chomp('/').split("/")[0..-2].join("/") #request.host won't work
       ext = ::File.extname(fullname)
       format = ext.split('.').last || 'txt'
       filename = ::File.basename(fullname, ext)
@@ -173,7 +173,7 @@ module Precious
       head = wiki.repo.head
 
       options = {
-        :message => "Uploaded file to uploads/#{reponame}",
+        :message => "Uploaded file to #{dir}/#{reponame}",
         :parent => wiki.repo.head.commit,
       }
       author = session['gollum.author']
@@ -189,8 +189,8 @@ module Precious
           committer.update_working_dir(dir, filename, format)
         end
         committer.commit
-        redirect to('/')
-      rescue Gollum::DuplicatePageError => e
+        redirect request.referer
+      rescue Gollum::DuplicatePageError => e #TODO deal with it
         @message = "Duplicate page: #{e.message}"
         mustache :error
       end
@@ -409,6 +409,7 @@ module Precious
       )?      # end the optional non-capturing group
     }x do |path|
       @path        = extract_path(path) if path
+      return redirect to("#{@path}/index") if ::File.exist?("#{@path}/index.rst") #AKRETION
       wiki_options = settings.wiki_options.merge({ :page_file_dir => @path })
       wiki         = Gollum::Wiki.new(settings.gollum_path, wiki_options)
       @results     = wiki.pages
@@ -430,6 +431,22 @@ module Precious
       @ref = wiki.ref
       mustache :file_view, { :layout => false }
     end
+    get '/import-features' do
+        import_features #TODO
+        redirect "/home"
+    end
+
+    get '/import-areas' do
+        import_areas #TODO
+        redirect "/home"
+    end
+
+    get '/changes' do
+      content_type 'txt'
+      return `git log --stat -30`
+    end
+
+
 
     get '/*' do
       show_page_or_file(params[:splat].first)
