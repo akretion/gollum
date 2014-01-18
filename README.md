@@ -23,7 +23,7 @@ Gollum follows the rules of [Semantic Versioning](http://semver.org/) and uses
 ## SYSTEM REQUIREMENTS
 
 - Python 2.5+ (2.7.3 recommended)
-- Ruby 1.8.7+ (1.9.3 recommended)
+- Ruby 1.9.3+ (1.9.3 recommended)
 - Unix like operating system (OS X, Ubuntu, Debian, and more)
 - Will not work on Windows (because of [grit](https://github.com/github/grit))
 
@@ -89,6 +89,32 @@ utility, you can run it like so:
 
 ```bash
 $ gollum --help
+```
+
+This will show you the options you can pass as arguments to the `gollum` command:
+
+```bash
+Options:
+        --port [PORT]                Bind port (default 4567).
+        --host [HOST]                Hostname or IP address to listen on (default 0.0.0.0).
+        --version                    Display current version.
+        --config [CONFIG]            Path to additional configuration file
+        --irb                        Start an irb process with gollum loaded for the current wiki.
+        --css                        Inject custom css. Uses custom.css from root repository
+        --js                         Inject custom js. Uses custom.js from root repository
+        --template-dir [PATH]        Specify custom template directory
+        --page-file-dir [PATH]       Specify the sub directory for all page files (default: repository root).
+        --base-path [PATH]           Specify the base path.
+        --gollum-path [PATH]         Specify the gollum path.
+        --ref [REF]                  Specify the repository ref to use (default: master).
+        --no-live-preview            Disables livepreview.
+        --live-preview               Enables livepreview.
+        --allow-uploads              Allows file uploads.
+        --mathjax                    Enables mathjax.
+        --user-icons [SOURCE]        Set the history user icons. Valid values: gravatar, identicon, none. Default: none.
+        --show-all                   Shows all files in file view. By default only valid pages are shown.
+        --collapse-tree              Collapse file view tree. By default, expanded tree is shown.
+        --h1-title                   Sets page title to value of first h1
 ```
 
 Note that the gollum server will not run on Windows because of [an issue](https://github.com/rtomayko/posix-spawn/issues/9) with posix-spawn (which is used by Grit).

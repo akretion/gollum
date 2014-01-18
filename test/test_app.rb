@@ -429,7 +429,7 @@ context "Frontend" do
     assert_equal "INITIAL", page2.raw_data.strip
   end
 =end
-
+=begin
   test "cannot revert conflicting commit" do
     page1 = @wiki.page('A')
 
@@ -440,6 +440,7 @@ context "Frontend" do
     page2 = @wiki.page('A')
     assert_equal page1.version.sha, page2.version.sha
   end
+=end
 =begin
   # redirects are now handled by class MapGollum in bin/gollum
   # they should be set in config.ru
@@ -520,6 +521,18 @@ context "Frontend" do
     assert_match /みかん/, last_response.body
     assert_match /バナナ/, last_response.body
     assert_match /スイカ/, last_response.body
+  end
+
+  test "add noindex tags to history pages" do
+    get "A"
+
+    assert last_response.ok?
+    assert_no_match /meta name="robots" content="noindex, nofollow"/, last_response.body
+
+    get "A/fc66539528eb96f21b2bbdbf557788fe8a1196ac"
+
+    assert last_response.ok?
+    assert_match /meta name="robots" content="noindex, nofollow"/, last_response.body
   end
 
   def app

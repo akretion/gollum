@@ -163,7 +163,9 @@ module Precious
         tempfile = params[:file][:tempfile]
       end
 
-      dir = request.referer.split('https://wiki.akretion.com/')[1].chomp('/').split("/")[0..-2].join("/") #request.host won't work
+#<<<<<<< HEAD
+#      dir = request.referer.split('https://wiki.akretion.com/')[1].chomp('/').split("/")[0..-2].join("/") #request.host won't work
+      dir = wiki.per_page_uploads ? params[:upload_dest] : 'uploads'
       ext = ::File.extname(fullname)
       format = ext.split('.').last || 'txt'
       filename = ::File.basename(fullname, ext)
@@ -289,6 +291,8 @@ module Precious
       format       = params[:format].intern
       wiki = wiki_new
 
+      path.gsub!(/^\//, '')
+
       begin
         wiki.write_page(name, format, params[:content], commit_message, path)
 
@@ -300,15 +304,14 @@ module Precious
       end
     end
 
-    post '/revert/:page/*' do
-      wikip        = wiki_page(params[:page])
+    post '/revert/*/:sha1/:sha2' do
+      wikip        = wiki_page(params[:splat].first)
       @path        = wikip.path
       @name        = wikip.name
       wiki         = wikip.wiki
       @page        = wiki.paged(@name,@path)
-      shas         = params[:splat].first.split("/")
-      sha1         = shas.shift
-      sha2         = shas.shift
+      sha1         = params[:sha1]
+      sha2         = params[:sha2]
 
       commit = commit_message
       commit[:message] = "Revert commit #{sha1.chars.take(7).join}"
@@ -387,6 +390,7 @@ module Precious
         @page = page
         @name = name
         @content = page.formatted_data
+        @version = version
         mustache :page
       else
         halt 404
@@ -462,6 +466,10 @@ module Precious
         @page = page
         @name = name
         @content  = page.formatted_data
+        @upload_dest = settings.wiki_options[:allow_uploads] ?
+                         (settings.wiki_options[:per_page_uploads] ?
+                            @name : 'uploads'
+                         ) : ''
 
         # Extensions and layout data
         @editable = true
