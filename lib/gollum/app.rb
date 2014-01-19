@@ -191,7 +191,7 @@ module Precious
           committer.update_working_dir(dir, filename, format)
         end
         committer.commit
-        redirect request.referer
+        redirect to(request.referer)
       rescue Gollum::DuplicatePageError => e #TODO deal with it
         @message = "Duplicate page: #{e.message}"
         mustache :error
