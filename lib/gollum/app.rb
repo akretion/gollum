@@ -185,6 +185,7 @@ module Precious
 
       begin
         committer = Gollum::Committer.new(wiki, options)
+committer.delete("#{dir}/#{filename}.#{format}") # Hack to avoid DuplicatePageError
         committer.add_to_index(dir, filename, format, contents)
         committer.after_commit do |committer, sha|
           wiki.clear_cache
@@ -482,7 +483,30 @@ module Precious
         mustache :page
       elsif file = wiki.file(fullpath, wiki.ref, true)
         if file.on_disk?
-          send_file file.on_disk_path, :disposition => 'inline'
+          if fullpath =~ /\.png$/  # TODO match jpg too; do it only if watermark file presentin directory
+            require 'digest'
+            require 'mini_magick'
+            
+            md5 = Digest::MD5.file(file.on_disk_path).hexdigest
+            watermarked_file = "/tmp/gollum_img#{md5}.png"
+            unless File.exist?(watermarked_file)
+              image = MiniMagick::Image.open(file.on_disk_path)
+              if image[:height] > 400
+                suffix = 'l'
+              elsif image[:height] > 200
+                suffix = 'm'
+              else
+                suffix = 's'
+              end
+              result = image.composite(MiniMagick::Image.open("#{settings.gollum_path}/watermark-#{suffix}.png", "png")) do |c|
+                c.gravity "center"
+              end
+              result.write watermarked_file
+            end
+            send_file watermarked_file, :disposition => 'inline'
+          else
+            send_file file.on_disk_path, :disposition => 'inline'
+          end
         else
           content_type file.mime_type
           file.raw_data
