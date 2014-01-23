@@ -185,7 +185,15 @@ module Precious
 
       begin
         committer = Gollum::Committer.new(wiki, options)
-committer.delete("#{dir}/#{filename}.#{format}") # Hack to avoid DuplicatePageError
+#dir = "" if dir == "."
+p "BBBBBB", dir, filename, format
+p "RRR", ::File.join(dir, "#{filename}.#{format}")
+if dir == "/Home"
+committer.delete("#{filename}.#{format}") # Hack to avoid DuplicatePageError
+dir = ""
+else
+committer.delete(::File.join(dir, "#{filename}.#{format}")) # Hack to avoid DuplicatePageError
+end
         committer.add_to_index(dir, filename, format, contents)
         committer.after_commit do |committer, sha|
           wiki.clear_cache
@@ -469,7 +477,7 @@ committer.delete("#{dir}/#{filename}.#{format}") # Hack to avoid DuplicatePageEr
         @content  = page.formatted_data
         @upload_dest = settings.wiki_options[:allow_uploads] ?
                          (settings.wiki_options[:per_page_uploads] ?
-                            "#{path}/#{@name}" : 'uploads'
+                            "#{path}/#{@name}".sub('//', '/') : 'uploads'
                          ) : ''
 
         # Extensions and layout data
