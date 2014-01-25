@@ -422,7 +422,7 @@ committer.delete(::File.join(dir, "#{filename}.#{format}")) # Hack to avoid Dupl
       )?      # end the optional non-capturing group
     }x do |path|
       @path        = extract_path(path) if path
-      return redirect to("#{@path}/index") if ::File.exist?("#{@path}/index.rst") #AKRETION
+      return redirect to("#{@path}/index") if ::File.exist?("#{settings.gollum_path}/#{@path}/index.rst") #AKRETION
       wiki_options = settings.wiki_options.merge({ :page_file_dir => @path })
       wiki         = Gollum::Wiki.new(settings.gollum_path, wiki_options)
       @results     = wiki.pages
@@ -491,30 +491,7 @@ committer.delete(::File.join(dir, "#{filename}.#{format}")) # Hack to avoid Dupl
         mustache :page
       elsif file = wiki.file(fullpath, wiki.ref, true)
         if file.on_disk?
-          if fullpath =~ /\.png$/  # TODO match jpg too; do it only if watermark file presentin directory
-            require 'digest'
-            require 'mini_magick'
-            
-            md5 = Digest::MD5.file(file.on_disk_path).hexdigest
-            watermarked_file = "/tmp/gollum_img#{md5}.png"
-            unless File.exist?(watermarked_file)
-              image = MiniMagick::Image.open(file.on_disk_path)
-              if image[:height] > 400
-                suffix = 'l'
-              elsif image[:height] > 200
-                suffix = 'm'
-              else
-                suffix = 's'
-              end
-              result = image.composite(MiniMagick::Image.open("#{settings.gollum_path}/watermark-#{suffix}.png", "png")) do |c|
-                c.gravity "center"
-              end
-              result.write watermarked_file
-            end
-            send_file watermarked_file, :disposition => 'inline'
-          else
-            send_file file.on_disk_path, :disposition => 'inline'
-          end
+          send_file file.on_disk_path, :disposition => 'inline'
         else
           content_type file.mime_type
           file.raw_data
