@@ -163,8 +163,6 @@ module Precious
         tempfile = params[:file][:tempfile]
       end
 
-#<<<<<<< HEAD
-#      dir = request.referer.split('https://wiki.akretion.com/')[1].chomp('/').split("/")[0..-2].join("/") #request.host won't work
       dir = wiki.per_page_uploads ? params[:upload_dest] : 'uploads'
       ext = ::File.extname(fullname)
       format = ext.split('.').last || 'txt'
@@ -185,15 +183,7 @@ module Precious
 
       begin
         committer = Gollum::Committer.new(wiki, options)
-#dir = "" if dir == "."
-p "BBBBBB", dir, filename, format
-p "RRR", ::File.join(dir, "#{filename}.#{format}")
-#if dir == "/Home"
-#committer.delete("#{filename}.#{format}") # Hack to avoid DuplicatePageError
-#dir = ""
-#else
-committer.delete(::File.join(dir, "#{filename}.#{format}")) # Hack to avoid DuplicatePageError
-#end
+        committer.delete(::File.join(dir, "#{filename}.#{format}")) # Hack to avoid DuplicatePageError
         committer.add_to_index(dir, filename, format, contents)
         committer.after_commit do |committer, sha|
           wiki.clear_cache
